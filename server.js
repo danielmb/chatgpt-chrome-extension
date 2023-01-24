@@ -1,62 +1,68 @@
-import dotenv from "dotenv-safe";
+import dotenv from 'dotenv-safe';
 dotenv.config();
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { ChatGPTAPIBrowser } from "chatgpt";
-import { oraPromise } from "ora";
-import config from "./config.js";
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { ChatGPTAPIBrowser } from 'chatgpt';
+import { oraPromise } from 'ora';
+import config from './config.js';
 
 const app = express().use(cors()).use(bodyParser.json());
 
 const gptApi = new ChatGPTAPIBrowser({
   email: process.env.OPENAI_EMAIL,
   password: process.env.OPENAI_PASSWORD,
+  executablePath: 'G:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  isMicrosoftLogin: true,
 });
 
 await gptApi.initSession();
 
 const Config = configure(config);
-
+/** @class Conversation */
 class Conversation {
-  conversationID = null;
-  parentMessageID = null;
+  /** @type {string | null} */
+  conversationId = null;
+  /** @type {string | null} */
+  parentMessageId = null;
 
   constructor() {}
-
+  /**
+   *
+   * @param {string} msg
+   * @returns {Promise<string>}
+   */
   async sendMessage(msg) {
     const res = await gptApi.sendMessage(
       msg,
-      this.conversationID && this.parentMessageID
+      this.conversationId && this.parentMessageId
         ? {
-            conversationId: this.conversationID,
-            parentMessageId: this.parentMessageID,
+            conversationId: this.conversationId,
+            parentMessageId: this.parentMessageId,
           }
-        : {}
+        : {},
     );
-    if (res.conversationID) {
-      this.conversationID = res.conversationID;
+    if (res.conversationId) {
+      this.conversationId = res.conversationId;
     }
     if (res.parentMessageID) {
-      this.parentMessageID = res.parentMessageID;
+      this.parentMessageId = res.parentMessageId;
     }
-
-    if (res.response) {
-      return res.response;
-    }
-    return res;
+    console.log(this);
+    if (!res.response) throw new Error('No response');
+    return res.response;
   }
 }
 
 const conversation = new Conversation();
 
-app.post("/", async (req, res) => {
+app.post('/', async (req, res) => {
   try {
     const rawReply = await oraPromise(
       conversation.sendMessage(req.body.message),
       {
         text: req.body.message,
-      }
+      },
     );
     const reply = await Config.parse(rawReply);
     console.log(`----------\n${reply}\n----------`);
@@ -75,15 +81,15 @@ const EnsureAuth = new Promise((resolve, reject) => {
 });
 
 async function start() {
-  await oraPromise(EnsureAuth, { text: "Connecting to ChatGPT" });
+  await oraPromise(EnsureAuth, { text: 'Connecting to ChatGPT' });
   await oraPromise(Config.train(), {
-    text: `Training ChatGPT (${Config.rules.length} plugin rules)`,
+    text: `Training ChatGPT with (${Config.rules.join('\n')} )`,
   });
   await oraPromise(
     new Promise((resolve) => app.listen(3000, () => resolve())),
     {
       text: `You may now use the extension`,
-    }
+    },
   );
 }
 
