@@ -100,10 +100,13 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   // If there's an active text input
 
-  if (!selectedText)
-    return alert(
-      'No text found. Select this option after right clicking on a textarea that contains text or on a selected portion of text.',
+  if (!selectedText) {
+    // eslint-disable-next-line max-len
+
+    return window.alert(
+      `No text found. Select this option after right clicking on a textarea that contains text or on a selected portion of text.`,
     );
+  }
 
   showLoadingCursor();
 
@@ -132,14 +135,14 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 
   restoreCursor();
 });
-/** @returns {void} */
+/** @return {void} */
 const showLoadingCursor = () => {
   const style = document.createElement('style');
   style.id = 'cursor_wait';
   style.innerHTML = `* {cursor: wait;}`;
   document.head.insertBefore(style, null);
 };
-/**  @returns {void} */
+/**  @return {void} */
 const restoreCursor = () => {
   document.getElementById('cursor_wait').remove();
 };

@@ -40,7 +40,7 @@ class Conversation {
             conversationId: this.conversationId,
             parentMessageId: this.parentMessageId,
           }
-        : {},
+        : {}
     );
     if (res.conversationId) {
       this.conversationId = res.conversationId;
@@ -62,7 +62,7 @@ app.post('/', async (req, res) => {
       conversation.sendMessage(req.body.message),
       {
         text: req.body.message,
-      },
+      }
     );
     const reply = await Config.parse(rawReply);
     console.log(`----------\n${reply}\n----------`);
@@ -80,6 +80,7 @@ const EnsureAuth = new Promise((resolve, reject) => {
   }, 300);
 });
 
+/** @return {Promise<void>} */
 async function start() {
   await oraPromise(EnsureAuth, { text: 'Connecting to ChatGPT' });
   await oraPromise(Config.train(), {
@@ -89,12 +90,24 @@ async function start() {
     new Promise((resolve) => app.listen(3000, () => resolve())),
     {
       text: `You may now use the extension`,
-    },
+    }
   );
 }
 
+/**
+ * @param {import('./config').Config} config
+ * @return {
+ *  {
+ *   train: () => Promise<void>,
+ *  parse: (reply: string) => Promise<string>,
+ *  rules: string[],
+ * ...import('./config').Config
+ * }
+ */
 function configure({ plugins, ...opts }) {
+  /** @type {string[]} */
   let rules = [];
+  /** @type {((reply: string) => Promise<string>)[]} */
   let parsers = [];
 
   // Collect rules and parsers from all plugins
@@ -108,6 +121,10 @@ function configure({ plugins, ...opts }) {
   }
 
   // Send ChatGPT a training message that includes all plugin rules
+  /**
+   *
+   * @returns {Promise<string>}
+   */
   const train = () => {
     if (!rules.length) return;
 
@@ -119,6 +136,10 @@ function configure({ plugins, ...opts }) {
   };
 
   // Run the ChatGPT response through all plugin parsers
+  /**
+   * @param {string} reply
+   * @returns {Promise<string>}
+   * */
   const parse = async (reply) => {
     for (const parser of parsers) {
       reply = await parser(reply);
