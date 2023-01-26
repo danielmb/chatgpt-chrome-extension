@@ -26,7 +26,7 @@ let insertText = (text, activeElement) => {
       `\n\n${text}` +
       activeElement.value.slice(
         activeElement.selectionEnd,
-        activeElement.length,
+        activeElement.length
       );
   } else {
     // Special handling for contenteditable
@@ -74,21 +74,6 @@ let getTextAndOriginalActiveElement = () => {
   };
 };
 
-/** @type {Array<{type: string, template: (input: string) => string}>} */
-let messageTypes = [
-  {
-    type: 'ASK_CHATGPT',
-    template: (input) => {
-      return input;
-    },
-  },
-  {
-    type: 'SUMMARIZE_CHATGPT',
-    template: (input) => {
-      return `Summarize this: ${input}`;
-    },
-  },
-];
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   let messageType = messageTypes.find((type) => type.type === message.type);
   if (!messageType) {
@@ -104,7 +89,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     // eslint-disable-next-line max-len
 
     return window.alert(
-      `No text found. Select this option after right clicking on a textarea that contains text or on a selected portion of text.`,
+      `No text found. Select this option after right clicking on a textarea that contains text or on a selected portion of text.`
     );
   }
 
@@ -117,7 +102,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     data = await sendData(messageType.template(selectedText));
   } catch (_error) {
     alert(
-      "Error. Make sure you're running the server by following the instructions on https://github.com/gragland/chatgpt-chrome-extension. Also make sure you don't have an adblocker preventing requests to localhost:3000.",
+      "Error. Make sure you're running the server by following the instructions on https://github.com/gragland/chatgpt-chrome-extension. Also make sure you don't have an adblocker preventing requests to localhost:3000."
     );
     restoreCursor();
     return;
