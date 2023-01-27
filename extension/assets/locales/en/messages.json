@@ -1,0 +1,11 @@
+{
+  "appName": {
+    "message": "Ask ChatGPT"
+  },
+  "appShortName": {
+    "message": "Ask ChatGPT"
+  },
+  "appDescription": {
+    "message": "do chatgpt api stuff"
+  }
+}
