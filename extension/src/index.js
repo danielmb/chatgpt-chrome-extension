@@ -18,8 +18,8 @@
 // });
 
 // import messageTypes from './messageTypes.js';
-console.log('background.js');
-let messageTypes = require('./messageTypes.js');
+console.log('Loading context menus');
+import { messageTypes } from './lib/messageTypes.js';
 for (let messageType of messageTypes) {
   chrome.contextMenus.create({
     id: messageType.type,
@@ -27,7 +27,7 @@ for (let messageType of messageTypes) {
     contexts: ['all'],
   });
 }
-
+console.log('Loaded context menus');
 // Listen for when the user clicks on the context menu item
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   // switch (info.menuItemId) {
@@ -45,7 +45,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     alert('Invalid message type');
     return;
   }
-  chrome.tabs.sendMessage(tab.id, {
-    type: messageType.type,
-  });
+  try {
+    chrome.tabs.sendMessage(tab.id, {
+      type: messageType.type,
+    });
+  } catch (error) {
+    console.error(error);
+    alert('Error sending message');
+  }
 });

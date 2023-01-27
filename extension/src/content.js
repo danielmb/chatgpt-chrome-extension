@@ -1,4 +1,4 @@
-// Listen for messages from the background script
+import { messageTypes } from './lib/messageTypes.js';
 /** @param {string} data */
 let sendData = async (data) => {
   let response = await fetch('http://localhost:3000', {
@@ -73,7 +73,7 @@ let getTextAndOriginalActiveElement = () => {
     originalActiveElement,
   };
 };
-
+console.log('Adding listener');
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
   let messageType = messageTypes.find((type) => type.type === message.type);
   if (!messageType) {
